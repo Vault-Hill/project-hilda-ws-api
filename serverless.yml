@@ -1,0 +1,49 @@
+org: creativogee
+app: project-hilda
+service: project-hilda-ws-api
+frameworkVersion: '3'
+
+provider:
+  name: aws
+  runtime: nodejs18.x
+  websocketsApiName: project-hilda-ws-api
+  websocketsApiRouteSelectionExpression: $request.body.action
+  websocketsDescription: Project Hilda Websocket API for Realtime Communication
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - lambda:InvokeFunction
+        - lambda:InvokeAsync
+      Resource: arn:aws:lambda:${aws:region}:${aws:accountId}:function:${self:service}-${sls:stage}-welcome
+  environment:
+    APP_NAME: ${self:service}-${sls:stage}
+
+functions:
+  connect: 
+    handler: handlers/connect.handler
+    events:
+      - websocket:
+          route: $connect
+
+  disconnect:
+    handler: handlers/disconnect.handler
+    events:
+      - websocket:
+          route: $disconnect
+
+  default:
+    handler: handlers/default.handler
+    events:
+      - websocket: $default
+
+  prompt:
+    handler: handlers/prompt.handler
+    events:
+      - websocket:
+          route: prompt
+
+  welcome:
+    handler: handlers/welcome.handler
+    events:
+      - websocket:
+          route: welcome
