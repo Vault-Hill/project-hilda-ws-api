@@ -6,7 +6,18 @@ module.exports.handler = async (event, context) => {
   // grab the connectionId and callbackUrl from the payload
   const { connectionId, callbackUrl } = event;
 
-  // TODO: Create context in elastiCache using connectionId as key
+  // TODO: Create session context in ElastiCache using connectionId as key
+  // Depending on the inferences made from user authentication i.e orgId, we can create a context for the user
+  // by pulling the organization's "training" data from dynamoDB
+
+  // const sessionContext = [
+  //   {
+  //     "role": "system",
+  //     "content": "Fetched data from DynamoDB",
+  //   },
+  // ];
+
+  // await ElasticacheHelper.saveData(context, 'context', connectionId);
 
   //  Send message to client
   const response = {
