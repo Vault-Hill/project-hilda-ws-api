@@ -15,11 +15,16 @@ provider:
         - lambda:InvokeFunction
         - lambda:InvokeAsync
       Resource: arn:aws:lambda:${aws:region}:${aws:accountId}:function:${self:service}-${sls:stage}-welcome
+    - Effect: Allow
+      Action:
+        - sagemaker:InvokeEndpoint
+      Resource: arn:aws:sagemaker:${aws:region}:${aws:accountId}:endpoint/project-hilda-model-api
   environment:
     APP_NAME: ${self:service}-${sls:stage}
+    MODEL_ENDPOINT_NAME: project-hilda-model-api
 
 functions:
-  connect: 
+  connect:
     handler: handlers/connect.handler
     events:
       - websocket:
@@ -38,6 +43,7 @@ functions:
 
   prompt:
     handler: handlers/prompt.handler
+    runtime: python3.8
     events:
       - websocket:
           route: prompt

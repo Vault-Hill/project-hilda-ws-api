@@ -1,3 +1,7 @@
 {
-  "cSpell.words": ["apigatewaymanagementapi", "websockets"]
+  "cSpell.words": ["apigatewaymanagementapi", "boto", "websockets"],
+  "[python]": {
+    "editor.defaultFormatter": "ms-python.autopep8"
+  },
+  "python.formatting.provider": "none"
 }
