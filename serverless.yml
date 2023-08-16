@@ -48,8 +48,8 @@ functions:
       - websocket:
           route: prompt
 
-  welcome:
-    handler: handlers/welcome.handler
+  auth:
+    handler: handlers/auth.handler
     events:
       - websocket:
-          route: welcome
+          route: auth

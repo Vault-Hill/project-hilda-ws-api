@@ -3,12 +3,15 @@
 const { postToConnection } = require('../helpers/postToConnection');
 
 module.exports.handler = async (event, context) => {
+  // TODO Authenticate user
+  
   // grab the connectionId and callbackUrl from the payload
   const { connectionId, callbackUrl } = event;
 
+
   // TODO: Create session context in ElastiCache using connectionId as key
-  // Depending on the inferences made from user authentication i.e orgId, we can create a context for the user
-  // by pulling the organization's "training" data from dynamoDB
+  // Depending on the inferences made from user authentication i.e orgId, subscription, we can create a context for the user
+  // by pulling the organization's knowledge base from dynamoDB
 
   // const sessionContext = [
   //   {

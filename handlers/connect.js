@@ -5,8 +5,6 @@ const { getConnectionInfo } = require('../helpers/getConnectionInfo');
 
 module.exports.handler = async (event, context) => {
   try {
-    // TODO Authenticate user
-
     const connectionId = event.requestContext.connectionId;
     const callbackUrl = `https://${event.requestContext.domainName}/${event.requestContext.stage}`;
 
@@ -15,7 +13,7 @@ module.exports.handler = async (event, context) => {
     const lambda = new AWS.Lambda();
 
     const params = {
-      FunctionName: `${process.env.APP_NAME}-welcome`,
+      FunctionName: `${process.env.APP_NAME}-auth`,
       InvocationType: 'Event',
       Payload: JSON.stringify({ connectionId, callbackUrl }),
     };
