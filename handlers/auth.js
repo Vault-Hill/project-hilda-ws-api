@@ -1,38 +1,54 @@
 'use strict';
 
+const { createRedisClient } = require('../helpers/createRedisClient');
 const { postToConnection } = require('../helpers/postToConnection');
 
 module.exports.handler = async (event, context) => {
-  // TODO Authenticate user
-  
-  // grab the connectionId and callbackUrl from the payload
+  // TODO: Authenticate user
+
+  // Get connectionId and callbackUrl from event
   const { connectionId, callbackUrl } = event;
 
+  const redisClient = await createRedisClient();
 
-  // TODO: Create session context in ElastiCache using connectionId as key
   // Depending on the inferences made from user authentication i.e orgId, subscription, we can create a context for the user
   // by pulling the organization's knowledge base from dynamoDB
 
-  // const sessionContext = [
-  //   {
-  //     "role": "system",
-  //     "content": "Fetched data from DynamoDB",
-  //   },
-  // ];
+  // Temporary session context. Should come from dynamoDB
+  const sessionContext = [
+    {
+      role: 'system',
+      content: `MTN has built strong core operations, which are underpinned by the largest fixed and mobile network in Africa; a large, connected registered customer base; an unparalleled registration and distribution network, as well as one of the strongest brands in our markets. John Doe is the CEO of MTN Group. He has been with the Group since April 2017. He is a seasoned executive with a wealth of experience spanning 25 years. He has extensive experience in the telecommunications sector, having held senior leadership roles at Vodafone, Celtel, Safaricom and Vodacom. He has also served on various boards including Vodacom Group and Vodacom South Africa. He is a member of the Board of the GSMA and the Chairman of the MTN GlobalConnect Board. 
+      
+      DO NOT PREFIX YOUR RESPONSE WITH ANY PHRASE. The user does not need to know you're working with a context. Simply respond as appropriate.`,
+    },
+  ];
 
-  // await ElasticacheHelper.saveData(context, 'context', connectionId);
+  redisClient
+    .set(connectionId, JSON.stringify(sessionContext))
+    .then(() => {
+      console.log('Session context created');
+    })
+    .catch((e) => {
+      console.log('Error creating session context', e);
+    })
+    .finally(async () => {
+      await redisClient.quit();
+    });
 
   //  Send message to client
   const response = {
     action: 'connect',
     data: {
-      role: 'Hilda',
-      message: 'Welcome! My name is Hilda. How may I help you?',
+      role: 'assistant',
+      message: 'Welcome! How may I help you?',
       timestamp: Date.now(),
     },
   };
 
+  console.log('Sending message to client', connectionId, callbackUrl);
   await postToConnection(callbackUrl, connectionId, response);
+  console.log('Message sent to client');
 
   return {
     statusCode: 200,

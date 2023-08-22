@@ -1,16 +1,20 @@
 'use strict';
 
-const { sendMessageToClient } = require('../helpers/sendMessageToClient');
-const { getCallbackUrl } = require('../helpers/getCallbackUrl');
-
 module.exports.handler = async (event, context) => {
-  const callbackUrl = getCallbackUrl(event);
-
+  const callbackUrl = `https://${event.requestContext.domainName}/${event.requestContext.stage}`;
   const connectionId = event.requestContext.connectionId;
 
-  const response = { message: 'This is the default message' };
+  //  Send message to client
+  const response = {
+    action: 'default',
+    data: {
+      role: 'Hilda',
+      message: 'Hello there!',
+      timestamp: Date.now(),
+    },
+  };
 
-  await sendMessageToClient(callbackUrl, connectionId, response);
+  await postToConnection(callbackUrl, connectionId, response);
 
   return {
     statusCode: 200,

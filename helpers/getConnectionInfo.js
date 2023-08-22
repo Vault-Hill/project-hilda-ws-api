@@ -1,19 +1,20 @@
 'use strict';
 
-const AWS = require('aws-sdk');
+const {
+  ApiGatewayManagementApi,
+  GetConnectionCommand,
+} = require('@aws-sdk/client-apigatewaymanagementapi');
 
-module.exports.getConnectionInfo = (connectionId, callbackUrl) => {
-  const apigatewaymanagementapi = new AWS.ApiGatewayManagementApi({
+module.exports.getConnectionInfo = async (connectionId, url) => {
+  const apigatewayClient = new ApiGatewayManagementApi({
     apiVersion: '2018-11-29',
-    endpoint: callbackUrl,
+    endpoint: url,
   });
 
-  const params = {
+  const command = new GetConnectionCommand({
     ConnectionId: connectionId,
-  };
-
-  apigatewaymanagementapi.getConnection(params, (err, data) => {
-    if (err) console.log(err, err.stack); // an error occurred
-    else console.log(data); // successful response
+  });
+  apigatewayClient.send(command).then((data) => {
+    console.log(data);
   });
 };

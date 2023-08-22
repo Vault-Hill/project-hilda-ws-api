@@ -1,24 +1,22 @@
 'use strict';
 
-const AWS = require('aws-sdk');
-const { getConnectionInfo } = require('../helpers/getConnectionInfo');
+const { LambdaClient, InvokeCommand } = require('@aws-sdk/client-lambda');
 
 module.exports.handler = async (event, context) => {
   try {
     const connectionId = event.requestContext.connectionId;
     const callbackUrl = `https://${event.requestContext.domainName}/${event.requestContext.stage}`;
 
-    getConnectionInfo(connectionId, callbackUrl);
+    const lambdaClient = new LambdaClient();
 
-    const lambda = new AWS.Lambda();
-
-    const params = {
+    const command = new InvokeCommand({
       FunctionName: `${process.env.APP_NAME}-auth`,
-      InvocationType: 'Event',
       Payload: JSON.stringify({ connectionId, callbackUrl }),
-    };
+      InvocationType: 'Event',
+    });
 
-    await lambda.invoke(params).promise();
+    // Invoke the auth lambda function asynchronously
+    await lambdaClient.send(command);
   } catch (error) {
     console.error('Error invoking MY lambda function:', error);
   }

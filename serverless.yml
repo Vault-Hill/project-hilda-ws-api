@@ -14,14 +14,40 @@ provider:
       Action:
         - lambda:InvokeFunction
         - lambda:InvokeAsync
-      Resource: arn:aws:lambda:${aws:region}:${aws:accountId}:function:${self:service}-${sls:stage}-welcome
+      Resource: arn:aws:lambda:${aws:region}:${aws:accountId}:function:${self:service}-${sls:stage}-auth
+    - Effect: Allow
+      Action:
+        - lambda:InvokeFunction
+        - lambda:InvokeAsync
+      Resource: arn:aws:lambda:${aws:region}:${aws:accountId}:function:${self:service}-${sls:stage}-prompt
     - Effect: Allow
       Action:
         - sagemaker:InvokeEndpoint
       Resource: arn:aws:sagemaker:${aws:region}:${aws:accountId}:endpoint/project-hilda-model-api
+    - Effect: Allow
+      Action:
+        - dynamodb:Query
+        - dynamodb:Scan
+        - dynamodb:GetItem
+        - dynamodb:PutItem
+        - dynamodb:UpdateItem
+        - dynamodb:DeleteItem
+      Resource: arn:aws:dynamodb:${aws:region}:${aws:accountId}:table/${self:service}-${sls:stage}-plansTable
+    - Effect: Allow
+      Action:
+        - dynamodb:Query
+        - dynamodb:Scan
+        - dynamodb:GetItem
+        - dynamodb:PutItem
+        - dynamodb:UpdateItem
+        - dynamodb:DeleteItem
+      Resource: arn:aws:dynamodb:${aws:region}:${aws:accountId}:table/${self:service}-${sls:stage}-organizationsTable
+
   environment:
     APP_NAME: ${self:service}-${sls:stage}
     MODEL_ENDPOINT_NAME: project-hilda-model-api
+    REDIS_HOST: project-hilda-redis.zulcwp.ng.0001.use1.cache.amazonaws.com
+    REDIS_PORT: 6379
 
 functions:
   connect:
@@ -43,7 +69,7 @@ functions:
 
   prompt:
     handler: handlers/prompt.handler
-    runtime: python3.8
+    timeout: 15
     events:
       - websocket:
           route: prompt
@@ -53,3 +79,31 @@ functions:
     events:
       - websocket:
           route: auth
+
+# Manage resources
+resources:
+  Resources:
+    OrganizationsTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: project-hilda-${sls:stage}-organizationsTable
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+        BillingMode: PAY_PER_REQUEST
+
+    # ContextCache:
+    #   Type: AWS::ElastiCache::CacheCluster
+    #   Properties:
+    #     CacheNodeType: cache.t2.micro
+    #     Engine: redis
+    #     NumCacheNodes: 1
+    #     Port: 6379
+    #     CacheSubnetGroupName: project-hilda-subnet-group
+    #     Tags:
+    #       - Key: Name
+    #         Value: project-hilda-${sls:stage}-context
