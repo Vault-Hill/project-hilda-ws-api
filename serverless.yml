@@ -32,16 +32,7 @@ provider:
         - dynamodb:PutItem
         - dynamodb:UpdateItem
         - dynamodb:DeleteItem
-      Resource: arn:aws:dynamodb:${aws:region}:${aws:accountId}:table/${self:service}-${sls:stage}-plansTable
-    - Effect: Allow
-      Action:
-        - dynamodb:Query
-        - dynamodb:Scan
-        - dynamodb:GetItem
-        - dynamodb:PutItem
-        - dynamodb:UpdateItem
-        - dynamodb:DeleteItem
-      Resource: arn:aws:dynamodb:${aws:region}:${aws:accountId}:table/${self:service}-${sls:stage}-organizationsTable
+      Resource: arn:aws:dynamodb:${aws:region}:${aws:accountId}:table/project-hilda-${sls:stage}-orgsTable
 
   environment:
     APP_NAME: ${self:service}-${sls:stage}
@@ -80,20 +71,30 @@ functions:
       - websocket:
           route: auth
 
+  scraper:
+    handler: handlers/scraper.handler
+    runtime: python3.8
+    events:
+      - schedule: cron(0 0 L * ? *)
+
 # Manage resources
 resources:
   Resources:
     OrganizationsTable:
       Type: AWS::DynamoDB::Table
       Properties:
-        TableName: project-hilda-${sls:stage}-organizationsTable
+        TableName: project-hilda-${sls:stage}-orgsTable
         AttributeDefinitions:
-          - AttributeName: id
+          - AttributeName: name
+            AttributeType: S
+          - AttributeName: regNo
             AttributeType: S
 
         KeySchema:
-          - AttributeName: id
+          - AttributeName: name
             KeyType: HASH
+          - AttributeName: regNo
+            KeyType: RANGE
         BillingMode: PAY_PER_REQUEST
 
     # ContextCache:
