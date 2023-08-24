@@ -3,7 +3,7 @@ const {
   InvokeEndpointCommand,
 } = require('@aws-sdk/client-sagemaker-runtime');
 const { postToConnection } = require('../helpers/postToConnection');
-const { createRedisClient } = require('../helpers/createRedisClient');
+const { DynamoDBClient, GetItemCommand, UpdateItemCommand } = require('@aws-sdk/client-dynamodb');
 
 exports.handler = async (event, context) => {
   try {
@@ -11,80 +11,92 @@ exports.handler = async (event, context) => {
     const connectionId = event.requestContext.connectionId;
     const payload = JSON.parse(event.body);
 
-    console.log('Payload', payload);
+    const dynamoDBClient = new DynamoDBClient();
 
-    // const redisClient = await createRedisClient();
+    // get user's session from dynamoDB
+    const session = await dynamoDBClient.send(
+      new GetItemCommand({
+        TableName: 'project-hilda-dev-sessionsTable',
+        Key: {
+          orgId: {
+            S: payload.orgId,
+          },
+          connectionId: {
+            S: connectionId,
+          },
+        },
+      }),
+    );
 
-    // const context = await redisClient.get(connectionId);
+    console.log('Session', session);
 
-    // const dialog = JSON.parse(context);
+    const context = JSON.parse(session.Item.context.S);
 
-    // console.log('Session context', dialog);
+    console.log('Context', context);
 
-    const dialog = [
-      {
-        role: 'system',
-        content: `MTN has built strong core operations, which are underpinned by the largest fixed and mobile network in Africa; a large, connected registered customer base; an unparalleled registration and distribution network, as well as one of the strongest brands in our markets. John Doe is the CEO of MTN Group. He has been with the Group since April 2017. He is a seasoned executive with a wealth of experience spanning 25 years. He has extensive experience in the telecommunications sector, having held senior leadership roles at Vodafone, Celtel, Safaricom and Vodacom. He has also served on various boards including Vodacom Group and Vodacom South Africa. He is a member of the Board of the GSMA and the Chairman of the MTN GlobalConnect Board. 
-        
-        DO NOT PREFIX YOUR RESPONSE WITH ANY PHRASE. The user does not need to know you're working with a context. Simply respond as appropriate.`,
-      },
-    ];
-
-    dialog.push({ role: 'user', content: payload.data.message });
+    context.push({ role: 'user', content: payload.data.message });
 
     const prompts = {
-      inputs: [dialog],
+      inputs: [context],
       parameters: { max_new_tokens: 256, top_p: 0.9, temperature: 0.6 },
     };
 
-    const endpointName = process.env.MODEL_ENDPOINT_NAME;
     const sagemakerClient = new SageMakerRuntimeClient();
 
-    const command = new InvokeEndpointCommand({
-      EndpointName: endpointName,
-      ContentType: 'application/json',
-      Accept: 'application/json',
-      Body: JSON.stringify(prompts),
-      CustomAttributes: 'accept_eula=true',
-    });
-
-    const response = await sagemakerClient.send(command);
-
-    console.log('Response from SageMaker', response);
-
-    // response is Uint8ArrayBlobAdapter(115) [Uint8Array]
-    // convert to string
-
-    const parsedResponse = JSON.parse(
-      new TextDecoder('utf-8').decode(response.Body)
+    const response = await sagemakerClient.send(
+      new InvokeEndpointCommand({
+        EndpointName: process.env.MODEL_ENDPOINT_NAME,
+        ContentType: 'application/json',
+        Accept: 'application/json',
+        Body: JSON.stringify(prompts),
+        CustomAttributes: 'accept_eula=true',
+      }),
     );
 
-    console.log('Parsed response', parsedResponse);
+    const message = JSON.parse(new TextDecoder('utf-8').decode(response.Body))[0].generation;
 
     const generatedResponse = {
       action: 'prompt',
+      orgId: payload.orgId,
       data: {
         role: 'assistant',
-        message: parsedResponse[0].generation,
+        message,
         timestamp: new Date().toISOString(),
       },
     };
 
     console.log('Generated response', generatedResponse);
 
-    // redisClient
-    //   .set(connectionId, JSON.stringify(dialog))
-    //   .then(() => {
-    //     console.log('Session context updated');
-    //   })
-    //   .catch((e) => {
-    //     console.log('Error updating session context', e);
-    //   })
-    //   .finally(async () => {
-    //     await redisClient.quit();
-    //   });
+    const postPromise = postToConnection(callbackUrl, connectionId, generatedResponse);
 
-    await postToConnection(callbackUrl, connectionId, generatedResponse);
+    context.push({ role: 'system', content: message });
+
+    console.log('Updated context', context);
+
+    const storePromise = dynamoDBClient.send(
+      new UpdateItemCommand({
+        TableName: 'project-hilda-dev-sessionsTable',
+        Key: {
+          orgId: {
+            S: payload.orgId,
+          },
+          connectionId: {
+            S: connectionId,
+          },
+        },
+        UpdateExpression: 'SET #context = :context',
+        ExpressionAttributeNames: {
+          '#context': 'context',
+        },
+        ExpressionAttributeValues: {
+          ':context': {
+            S: JSON.stringify(context),
+          },
+        },
+      }),
+    );
+
+    await Promise.all([postPromise, storePromise]);
   } catch (error) {
     console.log('ERROR', error);
   }

@@ -32,7 +32,16 @@ provider:
         - dynamodb:PutItem
         - dynamodb:UpdateItem
         - dynamodb:DeleteItem
-      Resource: arn:aws:dynamodb:${aws:region}:${aws:accountId}:table/project-hilda-${sls:stage}-orgsTable
+      Resource: arn:aws:dynamodb:${aws:region}:${aws:accountId}:table/project-hilda-${sls:stage}-organizationsTable
+    - Effect: Allow
+      Action:
+        - dynamodb:Query
+        - dynamodb:Scan
+        - dynamodb:GetItem
+        - dynamodb:PutItem
+        - dynamodb:UpdateItem
+        - dynamodb:DeleteItem
+      Resource: arn:aws:dynamodb:${aws:region}:${aws:accountId}:table/project-hilda-${sls:stage}-sessionsTable
 
   environment:
     APP_NAME: ${self:service}-${sls:stage}
@@ -83,28 +92,27 @@ resources:
     OrganizationsTable:
       Type: AWS::DynamoDB::Table
       Properties:
-        TableName: project-hilda-${sls:stage}-orgsTable
+        TableName: project-hilda-${sls:stage}-organizationsTable
         AttributeDefinitions:
-          - AttributeName: name
+          - AttributeName: orgId
             AttributeType: S
-          - AttributeName: regNo
-            AttributeType: S
-
         KeySchema:
-          - AttributeName: name
+          - AttributeName: orgId
             KeyType: HASH
-          - AttributeName: regNo
-            KeyType: RANGE
         BillingMode: PAY_PER_REQUEST
 
-    # ContextCache:
-    #   Type: AWS::ElastiCache::CacheCluster
-    #   Properties:
-    #     CacheNodeType: cache.t2.micro
-    #     Engine: redis
-    #     NumCacheNodes: 1
-    #     Port: 6379
-    #     CacheSubnetGroupName: project-hilda-subnet-group
-    #     Tags:
-    #       - Key: Name
-    #         Value: project-hilda-${sls:stage}-context
+    sessionsTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: project-hilda-${sls:stage}-sessionsTable
+        AttributeDefinitions:
+          - AttributeName: connectionId
+            AttributeType: S
+          - AttributeName: orgId
+            AttributeType: S
+        KeySchema:
+          - AttributeName: connectionId
+            KeyType: HASH
+          - AttributeName: orgId
+            KeyType: RANGE
+        BillingMode: PAY_PER_REQUEST
