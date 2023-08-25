@@ -53,7 +53,8 @@ exports.handler = async (event, context) => {
       }),
     );
 
-    const message = JSON.parse(new TextDecoder('utf-8').decode(response.Body))[0].generation;
+    const message = JSON.parse(new TextDecoder('utf-8').decode(response.Body))[0].generation
+      .content;
 
     const generatedResponse = {
       action: 'prompt',
@@ -69,7 +70,7 @@ exports.handler = async (event, context) => {
 
     const postPromise = postToConnection(callbackUrl, connectionId, generatedResponse);
 
-    context.push({ role: 'system', content: message });
+    context.push({ role: 'assistant', content: message });
 
     console.log('Updated context', context);
 

@@ -25,7 +25,20 @@ module.exports.handler = async (event, context) => {
         orgId: { S: orgId },
         name: { S: 'MTN' },
         knowledgeBase: {
-          S: `MTN has built strong core operations, which are underpinned by the largest fixed and mobile network in Africa; a large, connected registered customer base; an unparalleled registration and distribution network, as well as one of the strongest brands in our markets. John Doe is the CEO of MTN Group. He has been with the Group since April 2017. He is a seasoned executive with a wealth of experience spanning 25 years. He has extensive experience in the telecommunications sector, having held senior leadership roles at Vodafone, Celtel, Safaricom and Vodacom. He has also served on various boards including Vodacom Group and Vodacom South Africa. He is a member of the Board of the GSMA and the Chairman of the MTN GlobalConnect Board. DO NOT PREFIX YOUR RESPONSE WITH ANY PHRASE. The user does not need to know you're working with a context. Simply respond as appropriate.`,
+          S: `
+          Context for Virtual Assistant:
+
+          Assistant Name: Hilda
+
+          Response Directive: DO NOT PREFIX YOUR RESPONSE. The user does not need to know you're working with a context. Simply respond as appropriate.
+          If you don't know the answer to a question, respectfully inform the user that you don't know the answer. REMEMBER, GO STRAIGHT TO THE POINT.
+
+          Company: MTN
+          Company Description: MTN has built strong core operations, which are underpinned by the largest fixed and mobile network in Africa; a large, connected registered customer base; an unparalleled registration and distribution network, as well as one of the strongest brands in our markets.
+
+          CEO: John Doe
+          CEO Description: John Doe is the CEO of MTN Group. He has been with the Group since April 2017. He is a seasoned executive with a wealth of experience spanning 25 years. He has extensive experience in the telecommunications sector, having held senior leadership roles at Vodafone, Celtel, Safaricom and Vodacom. He has also served on various boards including Vodacom Group and Vodacom South Africa. He is a member of the Board of the GSMA and the Chairman of the MTN GlobalConnect Board.
+        `,
         },
       },
     }),

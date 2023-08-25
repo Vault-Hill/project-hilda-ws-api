@@ -1,0 +1,111 @@
+org: creativogee
+app: project-hilda
+service: project-hilda
+frameworkVersion: '3'
+
+provider:
+  name: aws
+  runtime: nodejs18.x
+  websocketsApiName: project-hilda-ws-api
+  websocketsApiRouteSelectionExpression: $request.body.action
+  websocketsDescription: Project Hilda Websocket API for Realtime Communication
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - lambda:InvokeFunction
+        - lambda:InvokeAsync
+      Resource: arn:aws:lambda:${aws:region}:${aws:accountId}:function:${self:service}-${sls:stage}-auth
+    - Effect: Allow
+      Action:
+        - lambda:InvokeFunction
+        - lambda:InvokeAsync
+      Resource: arn:aws:lambda:${aws:region}:${aws:accountId}:function:${self:service}-${sls:stage}-prompt
+    - Effect: Allow
+      Action:
+        - sagemaker:InvokeEndpoint
+      Resource: arn:aws:sagemaker:${aws:region}:${aws:accountId}:endpoint/${self:service}-${sls:stage}-model-api
+    - Effect: Allow
+      Action:
+        - dynamodb:GetItem
+        - dynamodb:PutItem
+        - dynamodb:UpdateItem
+        - dynamodb:DeleteItem
+      Resource: arn:aws:dynamodb:${aws:region}:${aws:accountId}:table/${self:service}-${sls:stage}-organizationsTable
+    - Effect: Allow
+      Action:
+        - dynamodb:GetItem
+        - dynamodb:PutItem
+        - dynamodb:UpdateItem
+        - dynamodb:DeleteItem
+      Resource: arn:aws:dynamodb:${aws:region}:${aws:accountId}:table/${self:service}-${sls:stage}-sessionsTable
+
+  environment:
+    APP_NAME: ${self:service}-${sls:stage}
+    MODEL_ENDPOINT_NAME: ${self:service}-${sls:stage}-model-api
+
+functions:
+  connect:
+    handler: handlers/connect.handler
+    events:
+      - websocket:
+          route: $connect
+
+  disconnect:
+    handler: handlers/disconnect.handler
+    events:
+      - websocket:
+          route: $disconnect
+
+  default:
+    handler: handlers/default.handler
+    events:
+      - websocket: $default
+
+  prompt:
+    handler: handlers/prompt.handler
+    timeout: 15
+    events:
+      - websocket:
+          route: prompt
+
+  auth:
+    handler: handlers/auth.handler
+    events:
+      - websocket:
+          route: auth
+
+  scraper:
+    handler: handlers/scraper.handler
+    runtime: python3.8
+    events:
+      - schedule: cron(0 0 L * ? *)
+
+resources:
+  Resources:
+    OrganizationsTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:service}-${sls:stage}-organizationsTable
+        AttributeDefinitions:
+          - AttributeName: orgId
+            AttributeType: S
+        KeySchema:
+          - AttributeName: orgId
+            KeyType: HASH
+        BillingMode: PAY_PER_REQUEST
+
+    sessionsTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:service}-${sls:stage}-sessionsTable
+        AttributeDefinitions:
+          - AttributeName: connectionId
+            AttributeType: S
+          - AttributeName: orgId
+            AttributeType: S
+        KeySchema:
+          - AttributeName: connectionId
+            KeyType: HASH
+          - AttributeName: orgId
+            KeyType: RANGE
+        BillingMode: PAY_PER_REQUEST
