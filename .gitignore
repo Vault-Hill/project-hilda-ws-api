@@ -7,3 +7,8 @@ jspm_packages
 
 # Ipynb resources
 *.ipynb
+
+# Datasets
+*.csv
+*.jsonl
+*.txt
