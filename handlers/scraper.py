@@ -1,5 +1,6 @@
 import requests
 import jsonlines
+import concurrent.futures
 from colorama import Fore
 from bs4 import BeautifulSoup
 from colorama import init as colorama_init
@@ -62,19 +63,22 @@ ALL_URLS = {
 # Error message in event of empty responses.
 error_message = "URLIssue: Please check that you provided the right URL to the function.\nIf the issue persiste then it means MTN has made changes to their website structure."
 
-def get_bundle_type_info(url:str, filename) -> str:
+def get_bundle_type_info(url:str, filename = "bundle_training_data.jsonl", return_file:bool = True) -> str:
     """
     This function scrapes all data regarding mobile bundles on the MTN website and returns them as a string.   
 
     Input:
         url:str => URL for MTN Mobile Plans page (Under Data).
         filename:str => Filename to store the JSONL dataset as. snake_case.jsonl naming convention is encouraged.
+        return_file:bool => Specify if you want the function to return a file or a list.
     Output:
         JSONL file containing questions and answers.
+        OR
+        list containing all Questions and responses ONLY if return_bool is set to true.
     """
 
     
-    data_info = [] # list containing questions and answers to be stored in JSONL file format.
+    bundle_type_info_jsons_list = [] # list containing questions and answers to be stored in JSONL file format.
 
     try:
         response = requests.get(url)
@@ -100,7 +104,7 @@ def get_bundle_type_info(url:str, filename) -> str:
             
             # Handling missing purchase info
             if len(other_info_combined.split()) != 4:
-                other_info_combined = (other_info_combined.strip().replace('"', "").replace("‘", "").replace("’", "")
+                other_info_combined = (other_info_combined.strip().replace('"', "").replace("‘", "").replace("’", "").replace("HR", "")
                 .replace("(available on myMTN NG app)", "kindly check our MTN app, it is").replace("Hrs", "hours").replace("hr", " hour(s)"))
             else:
                 other_info_combined = "Dial *312#"
@@ -110,20 +114,26 @@ def get_bundle_type_info(url:str, filename) -> str:
             response_2 = f"{plan} cost {price}, {other_info_combined}."
             response_3 = f"To purchase {plan} at {price}, {other_info_combined}."
             response_4 = f"To purchase {plan} which cost {price}, {other_info_combined}."
-            response_5 = f"MTN has {plan} seling as {price}, {other_info_combined}."
+            response_5 = f"MTN has {plan} seling at {price}, {other_info_combined}."
             response_6 = f"To buy {plan}, {other_info_combined}."
             
             # Generating responses.
-            data_info.append({"prompt" : f"question: {question_1}", "completion" : response_1})
-            data_info.append({"prompt" : f"question: {question_2}", "completion" : response_2})
-            data_info.append({"prompt" : f"question: {question_3}", "completion" : response_3})
-            data_info.append({"prompt" : f"question: {question_4}", "completion" : response_4})
-            data_info.append({"prompt" : f"question: {question_5}", "completion" : response_5})
-            data_info.append({"prompt" : f"question: {question_6}", "completion" : response_6})
+            bundle_type_info_jsons_list.append({"prompt" : f"question: {question_1}", "completion" : response_1})
+            bundle_type_info_jsons_list.append({"prompt" : f"question: {question_2}", "completion" : response_2})
+            bundle_type_info_jsons_list.append({"prompt" : f"question: {question_3}", "completion" : response_3})
+            bundle_type_info_jsons_list.append({"prompt" : f"question: {question_4}", "completion" : response_4})
+            bundle_type_info_jsons_list.append({"prompt" : f"question: {question_5}", "completion" : response_5})
+            bundle_type_info_jsons_list.append({"prompt" : f"question: {question_6}", "completion" : response_6})
 
-        # Writing list of questiona snd answers to JSONL file.   
-        with jsonlines.open(filename, 'w') as writer:
-            writer.write_all(data_info)
+        if return_file:
+            # Writing list of questiona snd answers to JSONL file.   
+            with jsonlines.open(filename, 'w') as writer:
+                writer.write_all(bundle_type_info_jsons_list)
+                message = f"{Fore.LIGHTGREEN_EX}Data saved as .jsonl in '{filename}'"
+                print(message)
+        else:
+            message = f"{Fore.LIGHTGREEN_EX}Data returned as list"
+            return bundle_type_info_jsons_list
 
     except Exception as e:
         print(f"{Fore.RED}Error encountered with get_bundle_type_info(): \n{Fore.MAGENTA}{e}")
@@ -159,7 +169,7 @@ def data_gifting_info(url:str) -> str:
         print(f"{Fore.RED}Error encountered with data_gifting_info(): \n{Fore.MAGENTA}{e}")
 
 
-def get_FAQs(url:str, filename:str):
+def get_FAQs(url:str, filename:str = "FAQs_training_data.jsonl", return_file:bool = True):
     """
     This function takes in the URL to the particular FAQs page and returns a tule containing   
     two lists One containing all FAQs and the other containing all responses to the FAQs.
@@ -167,11 +177,14 @@ def get_FAQs(url:str, filename:str):
     Input:
         url:str => URL for MTN Data Gifting page (Under Data).
         filename:str => Filename to store the JSONL dataset as. snake_case.jsonl naming convention is encouraged.
+        return_file:bool => Specify if you want the function to return a file or a list.
     Output:
         JSONL file containing questions and answers.
+        OR
+        list containing all Questions and responses ONLY if return_bool is set to true.
     """
     try:
-        FAQs_json_list = [] # list containing questions and answers to be stored in JSONL file format.
+        FAQs_jsons_list = [] # list containing questions and answers to be stored in JSONL file format.
         response = requests.get(url)
         soup = BeautifulSoup(response.content, features="lxml")
 
@@ -179,29 +192,34 @@ def get_FAQs(url:str, filename:str):
         responses = soup.find_all("div", {"class" : "panel"})
 
         for question, response in zip(FAQs, responses):
-            FAQs_json_list.append({"prompt" : f"question: {question.text.strip()}", "completion" : response.text.strip()[3:].replace("\n", " ").replace("  ", " ")})
+            FAQs_jsons_list.append({"prompt" : f"question: {question.text.strip()}", "completion" : response.text.strip()[3:].replace("\n", " ").replace("  ", " ")})
 
         # Raise exception if lists are empty, meaning URL has an issue.
-        if len(FAQs_json_list) == 0:
+        if len(FAQs_jsons_list) == 0:
             raise Exception(error_message)
         else:
-            # Writing list of questiona snd answers to JSONL file.   
-            with jsonlines.open(filename, 'w') as writer:
-                writer.write_all(FAQs_json_list)
+            if return_file:
+                # Writing list of questiona snd answers to JSONL file.   
+                with jsonlines.open(filename, 'w') as writer:
+                    writer.write_all(FAQs_jsons_list)
+            else:
+                return FAQs_jsons_list
 
-        
     except Exception as e:
         print(f"{Fore.RED}Error encountered with get_FAQs(): \n{Fore.MAGENTA}{e}")
 
 
-def get_executive_committee(url:str, filename):
+def get_executive_committee(url:str, filename = "executive_committee.jsonl", return_file:bool = True):
     """
     This function gets details about each member of the executive arm of MTN
     Input:
         url:str => URL for MTN Mobile Plans page (Under Data).
         filename:str => Filename to store the JSONL dataset as. snake_case.jsonl naming convention is encouraged.
+        return_file:bool => Specify if you want the function to return a file or a list.
     Output:
         returns jsonl file containing questions and answers regarding executives in MTN.
+        OR
+        list containing all Questions and responses ONLY if return_bool is set to true.
     """
     
     response = requests.get(url)
@@ -210,7 +228,7 @@ def get_executive_committee(url:str, filename):
     position_name_dict = {} # Dictionary containing names and positions
     names = [name.text for name in soup.find_all("h5")] # Extracting names of officers from the MTN website
     positions = [position.text for position in soup.find_all("div", {"class" : "leader-designation"})] # Extracting offices/positions.
-    executive_committee_info = [] # list containing questions and answers to be stored in JSONL file format.
+    executive_committee_jsons_list = [] # list containing questions and answers to be stored in JSONL file format.
 
     # Checking for multiple individuals with same role and formating data accordingly
     for name, position in zip(names, positions):
@@ -235,9 +253,9 @@ def get_executive_committee(url:str, filename):
             response_3 = f"The name of the current {position} of MTN is {name}"
 
             # Generating JSON data template and appending to list of Q&A
-            executive_committee_info.append({"prompt" : f"question: {question_1}", "completion" : response_1})
-            executive_committee_info.append({"prompt" : f"question: {question_2}", "completion" : response_2})
-            executive_committee_info.append({"prompt" : f"question: {question_3}", "completion" : response_3})
+            executive_committee_jsons_list.append({"prompt" : f"question: {question_1}", "completion" : response_1})
+            executive_committee_jsons_list.append({"prompt" : f"question: {question_2}", "completion" : response_2})
+            executive_committee_jsons_list.append({"prompt" : f"question: {question_3}", "completion" : response_3})
         else: # Handling positions that have multiple individuals.
             position_names = ", ".join(position_name_dict[position]) # Converting individual names into a string
             num_in_position = len(position_name_dict[position]) # Number of people currently holding the position.
@@ -252,31 +270,114 @@ def get_executive_committee(url:str, filename):
 
             # Generating responses to questions.
             response_1 = f"The current {position}s of MTN are {position_names}"
-            response_2 = f"Current, there are {num_in_position} {position}s {position_names}"
+            response_2 = f"Currently, there are {num_in_position} {position}s {position_names}"
             response_3 = f"The names of the current {position}s of MTN are {position_names}"
             response_4 = f"The current {position}s of MTN are {position_names}"
-            response_5 = f"Current, there are {num_in_position} {position}s {position_names}"
+            response_5 = f"Currently, there are {num_in_position} {position}s {position_names}"
             response_6 = f"The names of the {num_in_position} {position}s of MTN are {position_names}"
 
             # Generating JSON data template and appending to list of Q&A
-            executive_committee_info.append({"prompt" : f"question: {question_1}", "completion" : response_1})
-            executive_committee_info.append({"prompt" : f"question: {question_2}", "completion" : response_2})
-            executive_committee_info.append({"prompt" : f"question: {question_3}", "completion" : response_3})
-            executive_committee_info.append({"prompt" : f"question: {question_4}", "completion" : response_4})
-            executive_committee_info.append({"prompt" : f"question: {question_5}", "completion" : response_5})
-            executive_committee_info.append({"prompt" : f"question: {question_6}", "completion" : response_6})
+            executive_committee_jsons_list.append({"prompt" : f"question: {question_1}", "completion" : response_1})
+            executive_committee_jsons_list.append({"prompt" : f"question: {question_2}", "completion" : response_2})
+            executive_committee_jsons_list.append({"prompt" : f"question: {question_3}", "completion" : response_3})
+            executive_committee_jsons_list.append({"prompt" : f"question: {question_4}", "completion" : response_4})
+            executive_committee_jsons_list.append({"prompt" : f"question: {question_5}", "completion" : response_5})
+            executive_committee_jsons_list.append({"prompt" : f"question: {question_6}", "completion" : response_6})
 
+    if return_file:
         # Writing list of questiona snd answers to JSONL file.   
         with jsonlines.open(filename, 'w') as writer:
-            writer.write_all(executive_committee_info)
+            writer.write_all(executive_committee_jsons_list)
+        message = f"{Fore.LIGHTGREEN_EX}Data saved as .jsonl in '{filename}'"
+    else:
+        message = f"{Fore.LIGHTGREEN_EX}Data returned as list"
+        return executive_committee_jsons_list
 
     if len(names) | len(positions) == 0: # Checking if any data was succesfully scraped.
         print(f"{Fore.RED}Error encountered with get_executive_committee():\n{Fore.MAGENTA}Check that the url provided is correct, if error persists then MTN has made changes to their website")
     else:
         # Confirmation message.
-        print(f"{Fore.LIGHTGREEN_EX}Data saved as .jsonl in '{filename}'")
+        print(message)
 
 
-get_executive_committee(ALL_URLS["leadership"]["executive_bod"])
-# response = data_gifting_info("https://www.google.com")
-# print(response)
+def get_all_questions_and_responses(return_file:bool = True, filename:str = "train.jsonl"):
+    """
+    This function calls all scraper functions with the appropriate URLs and returns collection of JSONL datasets received from them.
+    Input:
+        filename:str => Filename to store the JSONL dataset as. snake_case.jsonl naming convention is encouraged.
+        return_file:bool => Specify if you want the function to return a file or a list.
+    Output:
+        returns jsonl file containing all training/finetuning questions and answers.
+        OR
+        list containing all Questions and responses ONLY if return_bool is set to true.
+    """
+
+    # Create a ThreadPoolExecutor with 2 threads
+    with concurrent.futures.ThreadPoolExecutor(max_workers=12) as executor:
+        # Submit tasks for data bundles
+        data_plans_future = executor.submit(get_bundle_type_info, ALL_URLS["data_urls"]["data_plans"], "", False)
+        router_plans_future = executor.submit(get_bundle_type_info, ALL_URLS["data_urls"]["router_plans"], "", False)
+        fiber_plans_future = executor.submit(get_bundle_type_info, ALL_URLS["data_urls"]["fiber_plans"], "", False)
+        sm_bundles_future = executor.submit(get_bundle_type_info, ALL_URLS["data_urls"]["sm_bundles"], "", False)
+        video_streaming_future = executor.submit(get_bundle_type_info, ALL_URLS["data_urls"]["video_streaming_package"], "", False)
+
+        # Submit tasks for FAQs
+        data_gifting_future = executor.submit(get_FAQs, ALL_URLS["FAQs"]["data_gifting"], "", False)
+        data_bundles_future = executor.submit(get_FAQs, ALL_URLS["FAQs"]["data_bundles"], "", False)
+        always_on_data_future = executor.submit(get_FAQs, ALL_URLS["FAQs"]["always_on_data"], "", False)
+        hourly_bundle_future = executor.submit(get_FAQs, ALL_URLS["FAQs"]["hourly_bundle"], "", False)
+        family_pack_bundles_future = executor.submit(get_FAQs, ALL_URLS["FAQs"]["family_pack_bundles"], "", False)
+        goodbag_social_future = executor.submit(get_FAQs, ALL_URLS["FAQs"]["goodbag_social"], "", False)
+        data_referral_future = executor.submit(get_FAQs, ALL_URLS["FAQs"]["data_referral"], "", False)
+        youtube_pack_future = executor.submit(get_FAQs, ALL_URLS["FAQs"]["youtube_pack"], "", False)
+        _4G_LTE_future = executor.submit(get_FAQs, ALL_URLS["FAQs"]["4G_LTE"], "", False)
+        router_plans_faq_future = executor.submit(get_FAQs, ALL_URLS["FAQs"]["router_plans"], "", False)
+        xtravalue_more_future = executor.submit(get_FAQs, ALL_URLS["FAQs"]["xtravalue_more"], "", False)
+        startimes_on_future = executor.submit(get_FAQs, ALL_URLS["FAQs"]["startimes_on"], "", False)
+
+        # Submit task for executive committee
+        leadership_future = executor.submit(get_executive_committee, ALL_URLS["leadership"]["executive_bod"], "", False)
+
+        # Retrieve the results when they are ready
+        data_plans_result = data_plans_future.result()
+        router_plans_result = router_plans_future.result()
+        fiber_plans_result = fiber_plans_future.result()
+        sm_bundles_result = sm_bundles_future.result()
+        video_streaming_result = video_streaming_future.result()
+
+        data_gifting_result = data_gifting_future.result()
+        data_bundles_result = data_bundles_future.result()
+        always_on_data_result = always_on_data_future.result()
+        hourly_bundle_result = hourly_bundle_future.result()
+        family_pack_bundles_result = family_pack_bundles_future.result()
+        goodbag_social_result = goodbag_social_future.result()
+        data_referral_result = data_referral_future.result()
+        youtube_pack_result = youtube_pack_future.result()
+        _4G_LTE_result = _4G_LTE_future.result()
+        router_plans_faq_result = router_plans_faq_future.result()
+        xtravalue_more_result = xtravalue_more_future.result()
+        startimes_on_result = startimes_on_future.result()
+
+        leadership_result = leadership_future.result()
+
+
+    # Combining all datasets.
+    train_array = (data_plans_result + router_plans_result + fiber_plans_result +
+                   sm_bundles_result + video_streaming_result + data_gifting_result +
+                   data_bundles_result + always_on_data_result + hourly_bundle_result +
+                   family_pack_bundles_result + goodbag_social_result + data_referral_result +
+                   youtube_pack_result + _4G_LTE_result + router_plans_faq_result + xtravalue_more_result +
+                   startimes_on_result + leadership_result)
+    
+    # Handling file or list return.
+    if return_file:
+        # Writing list of questiona snd answers to JSONL file.   
+        with jsonlines.open(filename, 'w') as writer:
+            writer.write_all(train_array)
+        print(f"{Fore.LIGHTGREEN_EX}Data saved in .jsonl file as {filename}")
+    else:
+        print(f"{Fore.LIGHTGREEN_EX}Data returned as list")
+        return train_array
+ 
+
+get_all_questions_and_responses(return_file = True)
