@@ -10,7 +10,7 @@ module.exports.handler = async (event, context) => {
     const lambdaClient = new LambdaClient();
 
     const command = new InvokeCommand({
-      FunctionName: `${process.env.APP_NAME}-auth`,
+      FunctionName: `${process.env.SERVICE_NAME}-auth`,
       Payload: JSON.stringify({ connectionId, callbackUrl }),
       InvocationType: 'Event',
     });

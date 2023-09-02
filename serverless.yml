@@ -1,53 +1,54 @@
 org: creativogee
 app: project-hilda
-service: project-hilda-ws-api
+service: ${self:app}-ws-api
 frameworkVersion: '3'
+custom:
+  APP_NAME: ${self:app}-${sls:stage}
+  SERVICE_NAME: ${self:service}-${sls:stage}
 
 provider:
   name: aws
   runtime: nodejs18.x
-  websocketsApiName: project-hilda-ws-api
+  websocketsApiName: ${self:service}
   websocketsApiRouteSelectionExpression: $request.body.action
   websocketsDescription: Project Hilda Websocket API for Realtime Communication
-  iamRoleStatements:
-    - Effect: Allow
-      Action:
-        - lambda:InvokeFunction
-        - lambda:InvokeAsync
-      Resource: arn:aws:lambda:${aws:region}:${aws:accountId}:function:${self:service}-${sls:stage}-auth
-    - Effect: Allow
-      Action:
-        - lambda:InvokeFunction
-        - lambda:InvokeAsync
-      Resource: arn:aws:lambda:${aws:region}:${aws:accountId}:function:${self:service}-${sls:stage}-prompt
-    - Effect: Allow
-      Action:
-        - sagemaker:InvokeEndpoint
-      Resource: arn:aws:sagemaker:${aws:region}:${aws:accountId}:endpoint/project-hilda-model-api
-    - Effect: Allow
-      Action:
-        - dynamodb:Query
-        - dynamodb:Scan
-        - dynamodb:GetItem
-        - dynamodb:PutItem
-        - dynamodb:UpdateItem
-        - dynamodb:DeleteItem
-      Resource: arn:aws:dynamodb:${aws:region}:${aws:accountId}:table/project-hilda-${sls:stage}-organizationsTable
-    - Effect: Allow
-      Action:
-        - dynamodb:Query
-        - dynamodb:Scan
-        - dynamodb:GetItem
-        - dynamodb:PutItem
-        - dynamodb:UpdateItem
-        - dynamodb:DeleteItem
-      Resource: arn:aws:dynamodb:${aws:region}:${aws:accountId}:table/project-hilda-${sls:stage}-sessionsTable
+
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - dynamodb:GetItem
+            - dynamodb:PutItem
+            - dynamodb:UpdateItem
+            - dynamodb:DeleteItem
+          Resource: arn:aws:dynamodb:${aws:region}:${aws:accountId}:table/${self:custom.APP_NAME}-organizations
+        - Effect: Allow
+          Action:
+            - dynamodb:GetItem
+            - dynamodb:PutItem
+            - dynamodb:UpdateItem
+            - dynamodb:DeleteItem
+          Resource: arn:aws:dynamodb:${aws:region}:${aws:accountId}:table/${self:custom.APP_NAME}-sessions
+        - Effect: Allow
+          Action:
+            - lambda:InvokeFunction
+            - lambda:InvokeAsync
+          Resource: arn:aws:lambda:${aws:region}:${aws:accountId}:function:${self:custom.SERVICE_NAME}-auth
+        - Effect: Allow
+          Action:
+            - lambda:InvokeFunction
+            - lambda:InvokeAsync
+          Resource: arn:aws:lambda:${aws:region}:${aws:accountId}:function:${self:custom.SERVICE_NAME}-prompt
+        - Effect: Allow
+          Action:
+            - sagemaker:InvokeEndpoint
+          Resource: arn:aws:sagemaker:${aws:region}:${aws:accountId}:endpoint/project-hilda-model-endpoint
 
   environment:
-    APP_NAME: ${self:service}-${sls:stage}
-    MODEL_ENDPOINT_NAME: project-hilda-model-api
-    REDIS_HOST: project-hilda-redis.zulcwp.ng.0001.use1.cache.amazonaws.com
-    REDIS_PORT: 6379
+    APP_NAME: ${self:custom.APP_NAME}
+    SERVICE_NAME: ${self:custom.SERVICE_NAME}
+    MODEL_ENDPOINT_NAME: ${self:app}-model-endpoint
 
 functions:
   connect:
@@ -80,19 +81,18 @@ functions:
       - websocket:
           route: auth
 
-  scraper:
-    handler: handlers/scraper.handler
-    runtime: python3.8
-    events:
-      - schedule: cron(0 0 L * ? *)
+  # scraper:
+  #   handler: handlers/scraper.handler
+  #   runtime: python3.8
+  #   events:
+  #     - schedule: cron(0 0 L * ? *)
 
-# Manage resources
 resources:
   Resources:
-    OrganizationsTable:
+    organizations:
       Type: AWS::DynamoDB::Table
       Properties:
-        TableName: project-hilda-${sls:stage}-organizationsTable
+        TableName: ${self:custom.APP_NAME}-organizations
         AttributeDefinitions:
           - AttributeName: orgId
             AttributeType: S
@@ -101,10 +101,10 @@ resources:
             KeyType: HASH
         BillingMode: PAY_PER_REQUEST
 
-    sessionsTable:
+    sessions:
       Type: AWS::DynamoDB::Table
       Properties:
-        TableName: project-hilda-${sls:stage}-sessionsTable
+        TableName: ${self:custom.APP_NAME}-sessions
         AttributeDefinitions:
           - AttributeName: connectionId
             AttributeType: S

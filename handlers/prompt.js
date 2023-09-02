@@ -16,7 +16,7 @@ exports.handler = async (event, context) => {
     // get user's session from dynamoDB
     const session = await dynamoDBClient.send(
       new GetItemCommand({
-        TableName: 'project-hilda-dev-sessionsTable',
+        TableName: `${process.env.APP_NAME}-sessions`,
         Key: {
           orgId: {
             S: payload.orgId,
@@ -76,7 +76,7 @@ exports.handler = async (event, context) => {
 
     const storePromise = dynamoDBClient.send(
       new UpdateItemCommand({
-        TableName: 'project-hilda-dev-sessionsTable',
+        TableName: `${process.env.APP_NAME}-sessions`,
         Key: {
           orgId: {
             S: payload.orgId,
