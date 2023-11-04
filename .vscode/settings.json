@@ -1,5 +1,13 @@
 {
-  "cSpell.words": ["Ajoke", "apigatewaymanagementapi", "boto", "websockets"],
+  "cSpell.words": [
+    "Ajoke",
+    "apigatewaymanagementapi",
+    "Ayeesha",
+    "boto",
+    "NIGCOMSAT",
+    "uuidv",
+    "websockets"
+  ],
   "[python]": {
     "editor.defaultFormatter": "ms-python.autopep8"
   },

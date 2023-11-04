@@ -1,9 +1,10 @@
 'use strict';
 
-const { DynamoDBClient } = require('@aws-sdk/client-dynamodb');
+const { DynamoDBClient, UpdateItemCommand } = require('@aws-sdk/client-dynamodb');
 const { postToConnection } = require('../helpers/postToConnection');
 
 module.exports.handler = async (event, context) => {
+  console.log('DISCONNECT EVENT', event)
   const callbackUrl = `https://${event.requestContext.domainName}/${event.requestContext.stage}`;
   const connectionId = event.requestContext.connectionId;
   const payload = JSON.parse(event.body);

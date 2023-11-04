@@ -3,7 +3,7 @@
 const { DynamoDBClient, PutItemCommand, GetItemCommand } = require('@aws-sdk/client-dynamodb');
 const { postToConnection } = require('../helpers/postToConnection');
 const { authenticate } = require('../helpers/authenticate');
-const { getKnowledge } = require('../helpers/getKnowledge');
+const { getKnowledgeBase } = require('../helpers/getKnowledgeBase');
 
 module.exports.handler = async (event, context) => {
   // Get connectionId and callbackUrl from event
@@ -44,14 +44,9 @@ module.exports.handler = async (event, context) => {
   );
   console.log('Organization', organization);
 
-  const knowledgeBase = organization.Item.knowledgeBase.S;
-  const systemKnowledge = getKnowledge(agentName);
+  const knowledgeBase = getKnowledgeBase(agentName, organization.Item.knowledgeBase.S);
 
-  const knowledge = ` 
-  ${systemKnowledge}
-
-  ${knowledgeBase}
-  `;
+  console.log('Knowledge base', knowledgeBase)
 
   // use connectId and knowledgeBase to create a context for the user
   await dynamoDBClient.send(
@@ -65,7 +60,7 @@ module.exports.handler = async (event, context) => {
           S: JSON.stringify([
             {
               role: 'system',
-              content: knowledge,
+              content: knowledgeBase,
             },
           ]),
         },
@@ -77,6 +72,7 @@ module.exports.handler = async (event, context) => {
   const response = {
     action: 'connect',
     orgId,
+    sessionId: connectionId,
     agentName,
     logoUrl,
     data: {
