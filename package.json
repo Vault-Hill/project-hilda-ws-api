@@ -4,7 +4,12 @@
     "@aws-sdk/client-dynamodb": "^3.398.0",
     "@aws-sdk/client-lambda": "^3.395.0",
     "@aws-sdk/client-sagemaker-runtime": "^3.395.0",
-    "redis": "^4.6.7"
+    "crypto-js": "^4.1.1",
+    "jsonwebtoken": "^9.0.2"
   },
-  "name": "project-hilda-ws-api"
+  "name": "project-hilda-ws-api",
+  "devDependencies": {
+    "@types/crypto-js": "^4.1.2",
+    "@types/jsonwebtoken": "^9.0.3"
+  }
 }

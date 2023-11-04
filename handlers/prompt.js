@@ -18,11 +18,11 @@ exports.handler = async (event, context) => {
       new GetItemCommand({
         TableName: `${process.env.APP_NAME}-sessions`,
         Key: {
+          id: {
+            S: connectionId,
+          },
           orgId: {
             S: payload.orgId,
-          },
-          connectionId: {
-            S: connectionId,
           },
         },
       }),
@@ -35,6 +35,8 @@ exports.handler = async (event, context) => {
     console.log('Context', context);
 
     context.push({ role: 'user', content: payload.data.message });
+
+    console.log('Prompt Input', context)
 
     const prompts = {
       inputs: [context],
@@ -78,11 +80,11 @@ exports.handler = async (event, context) => {
       new UpdateItemCommand({
         TableName: `${process.env.APP_NAME}-sessions`,
         Key: {
+          id: {
+            S: connectionId,
+          },
           orgId: {
             S: payload.orgId,
-          },
-          connectionId: {
-            S: connectionId,
           },
         },
         UpdateExpression: 'SET #context = :context',

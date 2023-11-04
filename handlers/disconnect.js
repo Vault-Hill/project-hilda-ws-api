@@ -1,24 +1,48 @@
 'use strict';
 
+const { DynamoDBClient } = require('@aws-sdk/client-dynamodb');
 const { postToConnection } = require('../helpers/postToConnection');
 
 module.exports.handler = async (event, context) => {
-  // read orgId from header
-  // const orgId = event.headers.org_id;
-
-  // TODO: research if it is cost efficient and performant to delete context or let it expire
-  //  Delete context in elastiCache using connectionId as key
-  const connectionId = event.requestContext.connectionId;
-  // await ElasticacheHelper.deleteData('context', connectionId);
-
   const callbackUrl = `https://${event.requestContext.domainName}/${event.requestContext.stage}`;
-  const response = { message: 'Goodbye for now!' };
+  const connectionId = event.requestContext.connectionId;
+  const payload = JSON.parse(event.body);
+
+  const dynamoDBClient = new DynamoDBClient();
+
+  // update the session in dynamoDB with the endedAt timestamp
+  await dynamoDBClient.send(
+    new UpdateItemCommand({
+      TableName: `${process.env.APP_NAME}-sessions`,
+      Key: {
+        id: {
+          S: connectionId,
+        },
+        orgId: {
+          S: payload.orgId,
+        },
+      },
+      UpdateExpression: 'SET endedAt = :endedAt',
+      ExpressionAttributeValues: {
+        ':endedAt': {
+          S: new Date().toISOString(),
+        },
+      },
+    }),
+  );
+
+  const response = {
+    action: 'prompt',
+    orgId: payload.orgId,
+    data: {
+      role: 'assistant',
+      message: 'Thank you for reaching out. Goodbye for now.',
+      timestamp: new Date().toISOString(),
+    },
+  };
 
   //  Send message to client
   await postToConnection(callbackUrl, connectionId, response);
-
-  // Calculate the total prompts and total time spent on the call using the first and last prompt timestamps
-  // Update dynamoDB with the total prompts and total time spent on the call for the orgId
 
   return {
     statusCode: 200,
