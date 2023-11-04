@@ -57,6 +57,8 @@ exports.handler = async (event, context) => {
 
     const message = JSON.parse(new TextDecoder('utf-8').decode(response.Body))[0].generation
       .content;
+     //attaches the prompt to query user on plausible transfer to human agent
+    message += '\n\n Are you satisfied with my response ?';
 
     const generatedResponse = {
       action: 'prompt',
@@ -67,6 +69,13 @@ exports.handler = async (event, context) => {
         timestamp: new Date().toISOString(),
       },
     };
+
+     const checkQuery = (payload) => {
+      const myQuery = toLowerCase(payload.data.message);
+      if (myQuery.includes("no") || myQuery.includes ("not satisfied")){
+        console.log("would you like to be transferred to a human agent ?")
+      }
+    }
 
     console.log('Generated response', generatedResponse);
 
