@@ -11,11 +11,11 @@ module.exports.getKnowledgeBase = (agentName, userMangedKnowledge) => {
     return '';
   }
 
-  if (agentName === 'Ayeesha') {
+  if (agentName === 'Ayesha') {
     const systemKnowledge = `
     SYSTEM: ${base} Your name is ${agentName}. You are a virtual assistant for NIGCOMSAT. Please provide response to any NIGCOMSAT related questions using the content below. If you are unable to provide response using the below content, please politely decline to answer such question.
 
-    CONTENT: 
+    About: 
     Nigerian Communications Satellite Limited (NIGCOMSAT) and NIGCOMSAT-1R Satellite:
     NIGCOMSAT manages and operates the NIGCOMSAT-1R satellite located at 42.5oE.
     NIGCOMSAT-1R is a quad band satellite providing services in the Ku, Ka, C, and L bands.
@@ -36,7 +36,7 @@ module.exports.getKnowledgeBase = (agentName, userMangedKnowledge) => {
     Oil and gas installations
     Government and Defense
     Enterprises
-    Maritime and on-the-move vessels
+    Maritime and on-the-move vessels.
 
     Ku Setup Kit:
     The broadband service on the Ku band is provided on the iDirect platform.
@@ -48,7 +48,7 @@ module.exports.getKnowledgeBase = (agentName, userMangedKnowledge) => {
     Polarization: Linear
     Satellite location: 42.5oE
     Bandwidth: Dedicated/Shared
-    Frequency: 14/12Ghz
+    Frequency: 14/12Ghz.
     `;
     const knowledge = `${systemKnowledge} ${userMangedKnowledge}`;
     return knowledge;
