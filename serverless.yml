@@ -112,13 +112,9 @@ resources:
         AttributeDefinitions:
           - AttributeName: id # Connection ID
             AttributeType: S
-          - AttributeName: orgId
-            AttributeType: S
         KeySchema:
           - AttributeName: id
             KeyType: HASH
-          - AttributeName: orgId
-            KeyType: RANGE
         BillingMode: PAY_PER_REQUEST
 
     billings:

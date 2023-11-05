@@ -4,14 +4,30 @@ const { DynamoDBClient, UpdateItemCommand } = require('@aws-sdk/client-dynamodb'
 const { postToConnection } = require('../helpers/postToConnection');
 
 module.exports.handler = async (event, context) => {
-  console.log('DISCONNECT EVENT', event)
+  console.log('DISCONNECT EVENT', event);
   const callbackUrl = `https://${event.requestContext.domainName}/${event.requestContext.stage}`;
   const connectionId = event.requestContext.connectionId;
-  const payload = JSON.parse(event.body);
 
   const dynamoDBClient = new DynamoDBClient();
 
-  // update the session in dynamoDB with the endedAt timestamp
+  // fetch the session from dynamoDB
+  const session = await dynamoDBClient.send(
+    new GetItemCommand({
+      TableName: `${process.env.APP_NAME}-sessions`,
+      Key: {
+        id: {
+          S: connectionId,
+        },
+      },
+    }),
+  );
+
+  // calculate how long the session lasted
+  const startedAt = new Date(session.Item.startedAt.N);
+  const endedAt = new Date();
+  const duration = endedAt.getTime() - startedAt.getTime();
+
+  // update the session in dynamoDB with the endedAt timestamp and the duration
   await dynamoDBClient.send(
     new UpdateItemCommand({
       TableName: `${process.env.APP_NAME}-sessions`,
@@ -19,31 +35,18 @@ module.exports.handler = async (event, context) => {
         id: {
           S: connectionId,
         },
-        orgId: {
-          S: payload.orgId,
-        },
       },
-      UpdateExpression: 'SET endedAt = :endedAt',
+      UpdateExpression: 'SET endedAt = :endedAt, duration = :duration',
       ExpressionAttributeValues: {
         ':endedAt': {
-          S: new Date().toISOString(),
+          N: endedAt.getTime().toString(),
+        },
+        ':duration': {
+          N: duration.toString(),
         },
       },
     }),
   );
-
-  const response = {
-    action: 'prompt',
-    orgId: payload.orgId,
-    data: {
-      role: 'assistant',
-      message: 'Thank you for reaching out. Goodbye for now.',
-      timestamp: new Date().toISOString(),
-    },
-  };
-
-  //  Send message to client
-  await postToConnection(callbackUrl, connectionId, response);
 
   return {
     statusCode: 200,

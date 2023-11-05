@@ -23,9 +23,6 @@ exports.handler = async (event, context) => {
           id: {
             S: connectionId,
           },
-          orgId: {
-            S: payload.orgId,
-          },
         },
       }),
     );
@@ -74,9 +71,6 @@ exports.handler = async (event, context) => {
         Key: {
           id: {
             S: connectionId,
-          },
-          orgId: {
-            S: payload.orgId,
           },
         },
         UpdateExpression: 'SET #context = :context',
