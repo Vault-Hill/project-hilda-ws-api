@@ -39,8 +39,9 @@ exports.handler = async (event, context) => {
 
     const prompts = {
       inputs: [context],
-      parameters: { max_new_tokens: 256, top_p: 0.3, temperature: 0.3 },
+      parameters: { max_new_tokens: 189, top_p: 0.5, temperature: 0.2 },
     };
+    //i reduced the max tokens, increased top_p and reduced temperature for more concise and short answers
 
     const message = await invokeModel({ prompts });
 
