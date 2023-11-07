@@ -39,7 +39,7 @@ exports.handler = async (event, context) => {
 
     const prompts = {
       inputs: [context],
-      parameters: { max_new_tokens: 256, top_p: 0.9, temperature: 0.6 },
+      parameters: { max_new_tokens: 256, top_p: 0.3, temperature: 0.3 },
     };
 
     const message = await invokeModel({ prompts });
@@ -49,6 +49,9 @@ exports.handler = async (event, context) => {
       orgId: payload.orgId,
       sessionId: connectionId,
       agentName: payload.agentName,
+      metadata: {
+        sessionTtl: Math.floor(Date.now() / 1000) + 60 * 3,
+      },
       data: {
         totalDislikes: payload.totalDislikes,
         role: 'assistant',
