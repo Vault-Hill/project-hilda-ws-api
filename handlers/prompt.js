@@ -41,7 +41,7 @@ exports.handler = async (event, context) => {
       inputs: [context],
       parameters: { max_new_tokens: 189, top_p: 0.5, temperature: 0.2 },
     };
-    //i reduced the max tokens, increased top_p and reduced temperature for more concise and short answers
+    //reduced the max tokens, increased top_p and reduced temperature for more concise and short answers
 
     const message = await invokeModel({ prompts });
 
@@ -77,13 +77,17 @@ exports.handler = async (event, context) => {
             S: connectionId,
           },
         },
-        UpdateExpression: 'SET #context = :context',
+        UpdateExpression: 'SET #context = :context',#ttl = :ttl', //added a time to live session to the DB set to 3 minutes to terminate it if idle longer than 3 minutes
         ExpressionAttributeNames: {
           '#context': 'context',
+          '#ttl': 'ttl', 
         },
         ExpressionAttributeValues: {
           ':context': {
             S: JSON.stringify(context),
+          },
+          'ttl':{
+            N:(Math.floor(Date.now() /1000) + 60* 3).toString(),
           },
         },
       }),
