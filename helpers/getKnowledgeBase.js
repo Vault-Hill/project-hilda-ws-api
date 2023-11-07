@@ -1,5 +1,14 @@
-module.exports.getKnowledgeBase = (agentName, userMangedKnowledge) => {
+module.exports.getKnowledgeBase = (agentName, userMangedKnowledge, connectionId) => {
   console.log('agentName', agentName);
+  if (!userSessions[connectionId]){
+    userSessions[conectionId] = {
+      let userName = '';
+      let userEmail = '';
+      let userPhone = '';
+    };
+  }
+
+const userSession = userSessions[connectionId];
 
   const base = 'You are an AI created by Vault Hill. Please keep your responses very short.';
 
@@ -14,6 +23,9 @@ module.exports.getKnowledgeBase = (agentName, userMangedKnowledge) => {
   if (agentName === 'Ayesha') {
     const systemKnowledge = `
 SYSTEM: ${base} Your name is ${agentName}. You will work a virtual assistant for NIGCOMSAT. Please provide response to any NIGCOMSAT related questions using the content below. If you are unable to provide response using the below content, please politely decline to answer such question.
+SYSTEM: Please provide your name, Email and phone number. Enter 'name: Your Name', 'email: Your Email', 'phone: Your Number' to provide this information.
+
+
 
 About:
   Nigerian Communications Satellite (NIGCOMSAT) Limited is a government-owned company established in 2006 under the Federal Ministry of Communication and Digital Economy, operates the Nigerian Communications Satellite (NigComSat-1R). Launched in 2011, NigComSat-1R is Sub-Saharan Africa's first geostationary satellite, offering unique quad-band frequencies (C-band, Ku-band, Ka-band, and L-band) for connectivity across Africa, parts of Asia, and Europe. Nigerian Communications Satellite Limited (NIGCOMSAT) and NIGCOMSAT-1R Satellite. NIGCOMSAT manages and operates the NIGCOMSAT-1R satellite located at 42.5oE. NIGCOMSAT-1R is a quad band satellite providing services in the Ku, Ka, C, and L bands.
@@ -253,6 +265,32 @@ F.A.Q’s:
 
   Don't forget to keep your responses very short. Do not overembellish your responses, go straight to the point. You do not need to provide a full response to any question. If you are unable to provide response using the above content, please politely decline to answer such question.
 `;
+    if (userMangedKnowledge){
+      const lines = userMangedKnowledge.split('\n');
+      lines.forEach((line)) => {
+        const parts = line.split(':');
+        if (parts.length === 2){
+          const key = parts[0].trim().toLowerCase();
+          const value = parts[1].trim();
+          if (key === 'name'){
+            userSession.userName = value;}
+          else if (key === 'email'){
+            userSession.userEmail = value;}
+          else if (key === 'phone'){
+            userSession.userPhone = value;}
+        }
+      }
+    };
+
+    if (userSession.userName && userSession.userEmail && userSession.userPhone){
+      return `
+      SYSTEM: Thank you for providing your information. You are ${userSession.userName}, your phone Number is %{userSession.userPhone} and your email is ${userSession.Email}.`
+      ;
+    } else {
+      return ` Please provide your information.`;
+    }
+  }
+  
 
     const knowledge = `${systemKnowledge} ${userMangedKnowledge}`;
     return knowledge;
