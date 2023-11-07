@@ -181,29 +181,44 @@ Service Deliveries:
   The marketing efforts resulted to partnerships and service delivery to organisations such as Nigerian Television Authority (NTA), Benue State TV, Jigawa State TV, Sunnah TV, Honour Christian Assembly TV,  Media Trust TV, Defence Space Administration (DSA), Nigeria Immigration Services (NIS), Nigerian National Petroleum Company(NNPC) Ltd and its subsidiaries National Petroleum Telecommunication (NAPET) Ltd, Frontier Exploration Services (FES), Grato Ltd, Nilmage 247, Trefoil Networks, Jossy Productions Ltd etc.   
 
 NIGCOMSAT Offices:
-  Nigerian Communications Satellite Ltd, 
-  Obasanjo Space Center, 
-  Umaru Musa Yar'Adua ExpressWay, 
-  Lugbe, Abuja, 
-  Nigeria. 
+Nigerian Communications Satellite Ltd, 
+Obasanjo Space Center, 
+Umaru Musa Yar'Adua ExpressWay, 
+Lugbe, Abuja, 
+Nigeria
+Email: sales@nigcomsat.gov.ng
+ 
 
-  Lagos Regional Business Office, 
-  11 Awolowo Road, 
-  Opposite Lagos Motor Boat Club, 
-  South West Ikoyi, 
-  Lagos, Nigeria 
+Lagos Regional Business Office, 
+11 Awolowo Road, 
+Opposite Lagos Motor Boat Club, 
+South West Ikoyi, 
+Lagos, Nigeria
+Email: nigcomsatlagos@nigcomsat.gov.ng
 
-  Kaduna Regional Business Office, 
-  1 Independence Way 
-  Ahmed Aboki Abdullahi Investment House 
-  By Umaru Musa Yar'adua Conference Centre 
-  Kaduna- Kaduna State.
+Kaduna Regional Business Office, 
+1 Independence Way 
+Ahmed Aboki Abdullahi Investment House 
+By Umaru Musa Yar'adua Conference Centre 
+Kaduna- Kaduna State.
+Email: info@nigcomsat.gov.ng
 
 
-  North-East Regional Business Office, 
-  Government House Drive, 
-  G.R.A., 
-  Gombe State, Nigeria 
+North-East Regional Business Office, 
+Government House Drive, 
+G.R.A., 
+Gombe State, Nigeria
+Email: nerbo@nigcomsat.gov.ng
+
+FURTHER ENQUIRIES:
+Email: info@nigcomsat.gov.ng
+Telephone: 0700NIGCOMSAT
+Telephone:09064340086
+
+
+Regarding Broadcast : https://www.nigcomsat.gov.ng/service/broadcasting/sub-service#free-to-view
+Regarding Transponder Leasing: https://www.nigcomsat.gov.ng/service/transponder-leasing 
+Regarding Navigation: https://www.nigcomsat.gov.ng/service/navigation 
 
 F.A.Q’s:
   Question: What is NIGCOMSAT LTD and what do they do? 
