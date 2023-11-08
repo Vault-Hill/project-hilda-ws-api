@@ -52,6 +52,11 @@ provider:
           Resource: arn:aws:lambda:${aws:region}:${aws:accountId}:function:${self:custom.SERVICE_NAME}-prompt
         - Effect: Allow
           Action:
+            - lambda:InvokeFunction
+            - lambda:InvokeAsync
+          Resource: arn:aws:lambda:${aws:region}:${aws:accountId}:function:${self:custom.SERVICE_NAME}-disconnect
+        - Effect: Allow
+          Action:
             - sagemaker:InvokeEndpoint
           Resource: arn:aws:sagemaker:${aws:region}:${aws:accountId}:endpoint/project-hilda-model-endpoint
 

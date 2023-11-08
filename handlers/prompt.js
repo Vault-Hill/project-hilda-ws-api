@@ -2,6 +2,7 @@ const { postToConnection } = require('../helpers/postToConnection');
 const { DynamoDBClient, GetItemCommand, UpdateItemCommand } = require('@aws-sdk/client-dynamodb');
 const { invokeModel } = require('../helpers/invokeModel');
 const { interceptEvent } = require('../helpers/interceptEvent');
+const { LambdaClient, InvokeCommand } = require('@aws-sdk/client-lambda');
 
 exports.handler = async (event, context) => {
   try {
@@ -13,9 +14,24 @@ exports.handler = async (event, context) => {
     const connectionId = event.requestContext.connectionId;
     const payload = JSON.parse(event.body);
 
+    if (payload.data.action === 'disconnect') {
+      const lambdaClient = new LambdaClient();
+
+      await lambdaClient.send(
+        new InvokeCommand({
+          FunctionName: `${process.env.SERVICE_NAME}-disconnect`,
+          Payload: JSON.stringify({ connectionId, callbackUrl }),
+          InvocationType: 'Event',
+        }),
+      );
+
+      return {
+        statusCode: 200,
+      };
+    }
+
     const dynamoDBClient = new DynamoDBClient();
 
-    // get user's session from dynamoDB
     const session = await dynamoDBClient.send(
       new GetItemCommand({
         TableName: `${process.env.APP_NAME}-sessions`,
@@ -33,13 +49,16 @@ exports.handler = async (event, context) => {
 
     console.log('Context', context);
 
-    context.push({ role: 'user', content: payload.data.message });
+    context.push({
+      role: 'user',
+      content: `${payload.data.message} Keep your response short please`,
+    });
 
     console.log('Prompt Input', context);
 
     const prompts = {
       inputs: [context],
-      parameters: { max_new_tokens: 256, top_p: 0.3, temperature: 0.3 },
+      parameters: { max_new_tokens: 256, top_p: 0.9, temperature: 0.6 },
     };
 
     const message = await invokeModel({ prompts });
@@ -49,9 +68,7 @@ exports.handler = async (event, context) => {
       orgId: payload.orgId,
       sessionId: connectionId,
       agentName: payload.agentName,
-      metadata: {
-        sessionTtl: Math.floor(Date.now() / 1000) + 60 * 3,
-      },
+      sessionTtl: Date.now() + 3 * 60 * 1000,
       data: {
         totalDislikes: payload.totalDislikes,
         role: 'assistant',

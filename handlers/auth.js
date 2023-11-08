@@ -46,7 +46,7 @@ module.exports.handler = async (event, context) => {
 
   const knowledgeBase = getKnowledgeBase(agentName, organization.Item.knowledgeBase.S);
 
-  console.log('Knowledge base', knowledgeBase)
+  console.log('Knowledge base', knowledgeBase);
 
   // use connectId and knowledgeBase to create a context for the user
   await dynamoDBClient.send(
@@ -75,9 +75,40 @@ module.exports.handler = async (event, context) => {
     sessionId: connectionId,
     agentName,
     logoUrl,
+    sessionTtl: Date.now() + 3 * 60 * 1000,
+    adhoc: 'customer-auth',
+    form: {
+      type: 'customer-auth',
+      fields: [
+        {
+          element: 'input',
+          name: 'name',
+          label: 'Name',
+          type: 'text',
+          placeholder: 'Enter your name',
+          required: true,
+        },
+        {
+          element: 'input',
+          name: 'email',
+          label: 'Email Address',
+          type: 'email',
+          placeholder: 'Enter your email address',
+          required: true,
+        },
+        {
+          element: 'input',
+          name: 'phone',
+          label: 'Phone Number',
+          type: 'phone',
+          placeholder: 'Enter your phone number',
+          required: true,
+        },
+      ],
+    },
     data: {
       role: 'assistant',
-      message: 'Hi there! How may I help you?',
+      message: `Hi there, I'm ${agentName}. To help you effectively, could you please share your name, email, and phone number?`,
       timestamp: Date.now(),
     },
   };
