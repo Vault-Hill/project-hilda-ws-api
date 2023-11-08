@@ -17,8 +17,7 @@ module.exports.getKnowledgeBase = (agentName, userMangedKnowledge) => {
     const systemKnowledge = `
 
 About:
-  Nigerian Communications Satellite (NIGCOMSAT) Limited is a government-owned company established in 2006 under the Federal Ministry of Communication and Digital Economy, operates the Nigerian Communications Satellite (NigComSat-1R). Launched in 2011, NigComSat-1R is Sub-Saharan Africa's first geostationary satellite, offering unique quad-band frequencies (C-band, Ku-band, Ka-band, and L-band) for connectivity across Africa, parts of Asia, and Europe. Nigerian Communications Satellite Limited (NIGCOMSAT) and NIGCOMSAT-1R Satellite. NIGCOMSAT manages and operates the NIGCOMSAT-1R satellite located at 42.5oE. NIGCOMSAT-1R is a quad band satellite providing services in the Ku, Ka, C, and L bands.
-  NIGCOMSAT's mission is to connect the unconnected in Africa through innovative satellite solutions, including transponder lease, broadband connectivity, satellite-based virtual private networks, and satellite broadcasting. These services cater to broadcasters, data and telecommunications providers, ISPs, government organizations, and corporate entities. The company is headquartered in Abuja, with additional business offices in Lagos, Kaduna, Gombe, and Enugu.
+  NIGCOMSAT Limited, a government-owned company founded in 2006 under the Federal Ministry of Communication and Digital Economy, operates the geostationary NigComSat-1R satellite. Launched in 2011, it offers unique quad-band frequencies (C-band, Ku-band, Ka-band, and L-band) for connectivity across Africa, parts of Asia, and Europe. NIGCOMSAT's mission is to connect the unconnected through innovative satellite solutions, including transponder leasing, broadband, virtual private networks, and broadcasting. Their services cater to various sectors and are headquartered in Abuja with additional offices in Lagos, Kaduna, Gombe, and Enugu.
   NIGCOMSAT Services:
   Transponder Leasing,
   Broadband services,
@@ -30,17 +29,7 @@ About:
   Space segment Operation and Services management
 
 Ku Broadband Services:
-  The Ku band covers West and Southern Africa and includes a beam over Kashi with strong footprints.
-  Services provided on the Ku and C bands include:
-  High-speed internet access,
-  Enterprise connectivity solution,
-  Multicasting and IP content distribution,
-  Virtual Private Network (VPN),
-  Video conferencing,
-  Cellular backhauling,
-  Tele-Medicine, 
-  Tele-Education, and 
-  e-government.
+  The Ku band covers West and Southern Africa with strong coverage over Kashi. Services in both the Ku and C bands include high-speed internet access, enterprise connectivity solutions, multicasting and IP content distribution, virtual private networks (VPNs), video conferencing, cellular backhauling, tele-medicine, tele-education, and e-government.
 
 Ku Setup Kit:
   The broadband service on the Ku band is provided on the iDirect platform.
@@ -101,27 +90,23 @@ Advantages of C:
 
 
 SBBC Products and Services: 
-  Advert-insertion Satellite Television model to drive new revenue model for the Direct-to-Home Television services leveraging Free to View TV model,
-  Digital Switch over services,
-  Rural ICT Kiosks,
-  Cellular Backhauling (CBH) for Rural Networks,
-  Financial inclusion services Network (Rural Banking, ATM deployment, Mobile Money Solution etc.),
-  Satellite broadband network and internet services: Enterprise and SoHo,
-  Campus Satellite Network for clustered communities,
-  Satellite Network Solution for Virtual Project Commissioning and Communications System,
-  Satellite Network based Value Added Services (VAS) for SoHo, IoT, bundled VoIP and home automation services,
-  Aggregation of Satellite Television neighborhood for NigComSat-1R using relevant local contents,
-  Turn around Services,
-  PayTV Model with Branded STB and Satellite TVRO system. 
-
+- Advert-insertion Satellite Television
+- Digital Switch Over Services
+- Rural ICT Kiosks
+- Cellular Backhauling (CBH) for Rural Networks
+- Financial Inclusion Services Network
+- Satellite Broadband Network and Internet Services
+- Campus Satellite Network
+- Satellite Network Solution for Virtual Project Commissioning and Communications System
+- Satellite Network-Based Value Added Services (VAS)
+- Aggregation of Satellite Television Neighborhood
+- Turn Around Services
+- PayTV Model with Branded STB and Satellite TVRO System
 
   NIGCOMSAT Offices:
-  Nigerian Communications Satellite Ltd, 
-  Obasanjo Space Center, 
-  Umaru Musa Yar'Adua ExpressWay, 
-  Lugbe, Abuja, 
-  Nigeria
-  Email: sales@nigcomsat.gov.ng
+
+Obasanjo Space Center, Umaru Musa Yar'Adua ExpressWay, Lugbe, Abuja, Nigeria
+Email: sales@nigcomsat.gov.ng
 
   Lagos Regional Business Office, 
   11 Awolowo Road, 
@@ -145,8 +130,7 @@ SBBC Products and Services:
 
   FURTHER ENQUIRIES:
   Email: info@nigcomsat.gov.ng
-  Telephone: 0700NIGCOMSAT
-  Telephone:09064340086
+  Telephone: 0700NIGCOMSAT/09064340086
   Regarding Broadcast : https://www.nigcomsat.gov.ng/service/broadcasting/sub-service#free-to-view
   Regarding Transponder Leasing: https://www.nigcomsat.gov.ng/service/transponder-leasing 
   Regarding Navigation: https://www.nigcomsat.gov.ng/service/navigation  
